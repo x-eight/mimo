@@ -8,9 +8,23 @@
   }
 ```
 
+**login USER**
+
+`post -> http://localhost:3000/users/login`
+```json
+  {
+    "email":"luis@example.com",
+    "password":"luis"
+  }
+```
+
 **update Role**
 
-`put -> http://localhost:3000/users/:id`
+`put -> http://localhost:3000/users`
+```js
+  Authorization: Bearer {token}
+```
+
 ```json
   {
     "status":"teacher"
@@ -21,19 +35,16 @@
   }
 ```
 
-**login USER**
-`post -> http://localhost:3000/users/login`
-```json
-  {
-    "email":"luis@example.com",
-    "password":"luis"
-  }
+**delete USER**
+
+`delete -> http://localhost:3000/users`
+```js
+  Authorization: Bearer {token}
 ```
+
+**post TEST**
 
 `post -> http://localhost:3000/users/test`
 ```js
   Authorization: Bearer {token}
 ```
-
-**delete USER**
-`delete -> http://localhost:3000/users/:id`

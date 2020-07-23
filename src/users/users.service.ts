@@ -27,10 +27,10 @@ export class UsersService {
     }
 
     async updateStatus(
-        id: string, 
+        userToken: User,
         status: RoleStatus,
     ):Promise<Users>{
-        const user = await this.UserModel.findById(id)
+        const user = await this.UserModel.findById(userToken.id)
         user.status = status
         await user.save()
         return user
@@ -58,16 +58,17 @@ export class UsersService {
     }
 
     async deleteUser(
-        id: string
+        userToken: User,
+        //id: string
     ): Promise<Users> {
-        const user = await this.UserModel.findById(id)
+        const user = await this.UserModel.findById(userToken.id)
 
     if (!user){
-        this.logger.verbose(`user1 with ID "${id}" cant delete`);
-        throw new NotImplementedException(`user1 with ID "${id}" cant delete`);
+        this.logger.verbose(`user1 with ID "${userToken.id}" cant delete`);
+        throw new NotImplementedException(`user1 with ID "${userToken.id}" cant delete`);
     }
-
-    await this.UserModel.remove(user);
+    const id = userToken.id
+    await this.UserModel.deleteOne({_id:id});
     return user;
     }
 

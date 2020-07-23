@@ -22,15 +22,6 @@ export class UsersController {
         return this.usersService.newUser(addUserDto)
     }
 
-    @Put('/:id')
-    updateStatus(
-        @Param('id', new ValidateObjectId()) id: string,
-        @Body('status', RoleValidationPipe) status: RoleStatus,
-        //@GetUser() user: User,
-    ): Promise<Users> {
-        return this.usersService.updateStatus(id, status);
-    }
-
     @Post('/login')
     logIn(
         @Body(ValidationPipe) user: loginUser,
@@ -38,12 +29,22 @@ export class UsersController {
         return this.usersService.logIn(user)
     }
 
-    @Delete('/:id')
+    @Put()
+    @UseGuards(AuthGuard())
+    updateStatus1(
+        @Body('status', RoleValidationPipe) status: RoleStatus,
+        @GetUser() user: User,
+    ): Promise<Users> {
+        return this.usersService.updateStatus(user, status);
+    }
+
+    @Delete()
+    @UseGuards(AuthGuard())
     deleteCourse(
-        @Param('id', new ValidateObjectId()) id: string,
-        //@GetUser() user: User,
+        //@Param('id', new ValidateObjectId()) id: string,
+        @GetUser() user: User,
     ):Promise<Users>{
-        return this.usersService.deleteUser(id)
+        return this.usersService.deleteUser(user)
     }
 
     /*----test token---*/
