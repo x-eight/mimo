@@ -1,0 +1,22 @@
+
+{
+  "server": {
+    "port": 3000
+  },
+
+  "db": {
+    "username" : "saul",
+    "password" : "1234",
+    "db" : "mimo",
+
+    "host" : "localhost",
+    "port" : 5432
+  },
+
+  "jwt": {
+    "secret": "topSecret",
+    "expiresIn": 3600
+  }
+
+}
+
