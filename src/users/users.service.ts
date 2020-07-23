@@ -22,6 +22,10 @@ export class UsersService {
         createUserDto: NewUser,
         //user: User,
     ):Promise<Users>{
+
+        if (!createUserDto.status) {
+            createUserDto.status = RoleStatus.STU
+        }
         const createdUser = new this.UserModel(createUserDto);
         return createdUser.save();
     }
@@ -45,7 +49,9 @@ export class UsersService {
             throw new UnauthorizedException('Invalid email');
         }
 
-        const pssw = (<IUsers>user).validateUserPassword(user.password)
+        const pssw = await (<IUsers>user).validateUserPassword(loginUser.password)
+        console.log("comparation")
+        console.log(pssw)
         if (!pssw) {
             throw new UnauthorizedException('password invalid')
         }

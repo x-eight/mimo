@@ -45,7 +45,11 @@ UserSchema.pre<IUsers>("save", async function(next) {
   next();
 });
 
-UserSchema.methods.validateUserPassword = async function (password: string): Promise<string>{
+UserSchema.methods.validateUserPassword = async function (password: string): Promise<Boolean>{
+  //const user = this;
+
+  //const hash = await bcrypt.hash(password, this.salt);
+  //return hash === this.password;
   return await bcrypt.compare(password, this.password);
 }
 

@@ -1,4 +1,4 @@
-import { Controller, ValidationPipe, Post, Body, Param, Put, Delete, UseGuards, Logger, Req } from '@nestjs/common';
+import { Controller, ValidationPipe, Post, Body, Param, Put, Delete, UseGuards, Logger, Req, UseInterceptors, UploadedFile } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { NewUser } from './dto/new-user';
 import { Users } from './users.schema';
@@ -7,6 +7,7 @@ import { RoleValidationPipe, ValidateObjectId } from "./pipes/status-validation"
 import { loginUser } from './dto/login';
 import { AuthGuard } from '@nestjs/passport';
 import { GetUser } from './decorator/user';
+import { FileInterceptor } from "@nestjs/platform-express";
 
 @Controller('users')
 export class UsersController {
@@ -17,7 +18,7 @@ export class UsersController {
     @Post()
     async newUser(
         @Body() addUserDto: NewUser,
-        //user: User,
+        //@Body('status', RoleValidationPipe) addUserDto: NewUser,
     ):Promise<Users>{
         return this.usersService.newUser(addUserDto)
     }
@@ -27,6 +28,12 @@ export class UsersController {
         @Body(ValidationPipe) user: loginUser,
     ): Promise<{ accessToken: string }> {
         return this.usersService.logIn(user)
+    }
+
+    @Post('/image')
+    @UseInterceptors(FileInterceptor('file'))
+        uploadFile(@UploadedFile() file) {
+        console.log(file);
     }
 
     @Put()

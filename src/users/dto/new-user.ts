@@ -8,5 +8,5 @@ export class NewUser {
     @IsNotEmpty()
     password: string;
 
-    avatar: RoleStatus;
+    status: RoleStatus;
 }
