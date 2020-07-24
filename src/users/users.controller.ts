@@ -24,7 +24,7 @@ export class UsersController {
 
     @Post()
     async newUser(
-        @Body() addUserDto: NewUser,
+        @Body(ValidationPipe) addUserDto: NewUser,
         //@Body('status', RoleValidationPipe) addUserDto: NewUser,
     ):Promise<Users>{
         return this.usersService.newUser(addUserDto)
