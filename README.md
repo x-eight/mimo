@@ -47,7 +47,7 @@
 
 **get WatchImg**
 
-`post -> http://localhost:3000/users/image`
+`get -> http://localhost:3000/users/image`
 ```js
   Authorization: Bearer {token}
 ```
