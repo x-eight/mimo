@@ -35,6 +35,23 @@
   }
 ```
 
+**post TEST**
+
+`put -> http://localhost:3000/users/image`
+```js
+  Authorization: Bearer {token}
+```
+```js
+  file: .jpg (jpge,png)
+```
+
+**get WatchImg**
+
+`post -> http://localhost:3000/users/image`
+```js
+  Authorization: Bearer {token}
+```
+
 **delete USER**
 
 `delete -> http://localhost:3000/users`

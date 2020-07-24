@@ -1,4 +1,4 @@
-import { Controller, ValidationPipe, Post, Body, Param, Put, Delete, UseGuards, Logger, Req, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { Controller, ValidationPipe, Post, Body, Param, Put, Delete, UseGuards, Logger, Req, UseInterceptors, UploadedFile, Get, Res } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { NewUser } from './dto/new-user';
 import { Users } from './users.schema';
@@ -29,11 +29,24 @@ export class UsersController {
     ): Promise<{ accessToken: string }> {
         return this.usersService.logIn(user)
     }
-
-    @Post('/image')
+    
+    @Put('/image')
+    @UseGuards(AuthGuard())
     @UseInterceptors(FileInterceptor('file'))
-        uploadFile(@UploadedFile() file) {
-        console.log(file);
+    uploadFile(
+        @GetUser() user: User,
+        @UploadedFile() file
+        ) {
+        return this.usersService.uploadImg(user,file);
+    }
+
+    @Get('/image')
+    @UseGuards(AuthGuard())
+    watchImg(
+        @Res() res,
+        @GetUser() user: User,
+        ) {
+        return this.usersService.watchImg(user,res);
     }
 
     @Put()

@@ -7,6 +7,8 @@ import { JwtStrategy } from './jwt/auth';
 import * as config from 'config';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
+import { MulterModule } from '@nestjs/platform-express';
+import { imageFilter } from './image/filter';
 
 const jwtConfig = config.get('jwt');
 
@@ -21,7 +23,16 @@ const jwtConfig = config.get('jwt');
       },
     }),
     //create collection
-    MongooseModule.forFeature([{ name: "Users", schema: UserSchema }])],
+    //schemaOption: {versionKey:}
+    MongooseModule.forFeature([{ name: "Users", schema: UserSchema }]),
+    
+    MulterModule.registerAsync({
+      useFactory:()=>({
+        fileFilter: imageFilter,
+      })
+    })
+    
+  ],
   controllers: [UsersController],
   providers: [
     JwtStrategy,//activate Bearer

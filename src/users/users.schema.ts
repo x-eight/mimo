@@ -2,12 +2,14 @@ import { Prop, Schema, SchemaFactory, ModelDefinition } from '@nestjs/mongoose';
 import { Document, Mongoose } from 'mongoose';
 import { RoleStatus } from './new.enum/role';
 import * as bcrypt from 'bcrypt';
+import { image } from './image/dataImg';
 
 
 export interface IUsers extends Document {
   email: string;
   password: string;
-  avatar: string;
+  avatar: image;
+  //avatar: {data:Buffer, contentType: string};
   status: RoleStatus;
   validateUserPassword: (password: string) => Promise<Boolean>;
 }
@@ -21,11 +23,18 @@ export class Users extends Document {
   @Prop()
   password: string;
 
-  @Prop()
-  avatar: string;
-
-  @Prop()
+  @Prop({default:RoleStatus.STU})
   status: RoleStatus;
+
+  @Prop({default:{contentType: "not image"}})
+  avatar: image;
+
+/*
+  @Prop({default: Date.now()})
+  createAt: Date;
+
+  url: string
+*/
 
 }
 
