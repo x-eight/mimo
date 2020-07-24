@@ -7,8 +7,8 @@ const dbConfig = config.get('db');
 
 @Module({
   imports: [
-    //MongooseModule.forRoot("mongodb+srv://saul:1234@cluster0-ooeaq.mongodb.net/chat?retryWrites=true&w=majority"),
-    MongooseModule.forRoot(`mongodb+srv://${dbConfig.username}:${dbConfig.password}@cluster0-ooeaq.mongodb.net/${dbConfig.db}?retryWrites=true&w=majority`),
+    
+    MongooseModule.forRoot(`mongodb://localhost:27017/${dbConfig.db}`),
     UsersModule,
   ],
   controllers: [],

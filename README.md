@@ -65,3 +65,8 @@
 ```js
   Authorization: Bearer {token}
 ```
+
+**get WatchTotalUser**
+
+`get -> http://localhost:3000/users/total`
+

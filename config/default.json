@@ -8,6 +8,7 @@
     "username" : "saul",
     "password" : "1234",
     "db" : "mimo",
+    "dbUser": "Users",
 
     "host" : "localhost",
     "port" : 5432

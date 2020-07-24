@@ -7,16 +7,25 @@ import { InjectModel } from '@nestjs/mongoose';
 import { loginUser } from './dto/login';
 import { JwtService } from '@nestjs/jwt';
 import { JwtPayload } from './jwt/payload';
+import * as config from 'config';
+
+const dbConfig = config.get('db');
 
 
 @Injectable()
 export class UsersService {
     private logger = new Logger('UsersService');
     constructor(
-        @InjectModel("Users")
+        @InjectModel(dbConfig.dbUser)
         private UserModel: Model<Users>,
         private jwtService: JwtService,
-    ) { }
+    ) {}
+
+    async totalUser(
+    ): Promise<Users[]> {
+        const createdUser = await this.UserModel.find()
+        return createdUser
+    }
 
     async newUser(
         createUserDto: NewUser,
@@ -45,8 +54,6 @@ export class UsersService {
         }
 
         const pssw = await (<IUsers>user).validateUserPassword(loginUser.password)
-        console.log("comparation")
-        console.log(pssw)
         if (!pssw) {
             throw new UnauthorizedException('password invalid')
         }

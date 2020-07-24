@@ -11,6 +11,7 @@ import { MulterModule } from '@nestjs/platform-express';
 import { imageFilter } from './image/filter';
 
 const jwtConfig = config.get('jwt');
+const dbConfig = config.get('db');
 
 @Module({
   imports: [
@@ -23,8 +24,7 @@ const jwtConfig = config.get('jwt');
       },
     }),
     //create collection
-    //schemaOption: {versionKey:}
-    MongooseModule.forFeature([{ name: "Users", schema: UserSchema }]),
+    MongooseModule.forFeature([{ name: dbConfig.dbUser, schema: UserSchema }]),
     
     MulterModule.registerAsync({
       useFactory:()=>({

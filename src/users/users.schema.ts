@@ -9,8 +9,8 @@ export interface IUsers extends Document {
   email: string;
   password: string;
   avatar: image;
-  //avatar: {data:Buffer, contentType: string};
   status: RoleStatus;
+  createAt: Date;
   validateUserPassword: (password: string) => Promise<Boolean>;
 }
 
@@ -29,17 +29,19 @@ export class Users extends Document {
   @Prop({default:{contentType: "not image"}})
   avatar: image;
 
-/*
   @Prop({default: Date.now()})
   createAt: Date;
-
-  url: string
-*/
 
 }
 
 export const UserSchema = SchemaFactory.createForClass(Users);
 
+UserSchema.methods.toJSON = function () {
+  const profile = this
+  const profileObject = profile.toObject()
+  delete profileObject.__v
+  return profileObject
+}
 
 UserSchema.pre<IUsers>("save", async function(next) {
   const user = this;

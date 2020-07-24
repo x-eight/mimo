@@ -3,17 +3,24 @@ import { UsersService } from './users.service';
 import { NewUser } from './dto/new-user';
 import { Users } from './users.schema';
 import { RoleStatus } from './new.enum/role';
-import { RoleValidationPipe, ValidateObjectId } from "./pipes/status-validation";
+import { RoleValidationPipe } from "./pipes/status-validation";
 import { loginUser } from './dto/login';
 import { AuthGuard } from '@nestjs/passport';
 import { GetUser } from './decorator/user';
 import { FileInterceptor } from "@nestjs/platform-express";
+
 
 @Controller('users')
 export class UsersController {
     private logger = new Logger('UsersController');
 
     constructor(private usersService: UsersService){}
+
+    @Get('/total')
+    totalUser(
+        ) {
+        return this.usersService.totalUser();
+    }
 
     @Post()
     async newUser(
