@@ -5,21 +5,22 @@ import { Model } from 'mongoose';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtPayload } from './payload';
 import * as config from 'config';
-import { Users } from '../users.schema';
+import { IUsers } from '../users.schema';
+import { jwt } from "../../config/app";
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
     @InjectModel("Users")
-    private userRepository: Model<Users>
+    private userRepository: Model<IUsers>
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      secretOrKey: process.env.JWT_SECRET || config.get('jwt.secret'),
+      secretOrKey: jwt.secret,
     });
   }
 
-  async validate(payload: JwtPayload): Promise<Users> {
+  async validate(payload: JwtPayload): Promise<IUsers> {
     const { email } = payload;
     const user = await this.userRepository.findOne({ email });
 

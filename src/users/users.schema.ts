@@ -1,49 +1,62 @@
-import { Prop, Schema, SchemaFactory, ModelDefinition } from '@nestjs/mongoose';
-import { Document, Mongoose } from 'mongoose';
+import { Document, Schema, model } from 'mongoose';
 import { RoleStatus } from './new.enum/role';
 import * as bcrypt from 'bcrypt';
-import { image } from './image/dataImg';
+import { db } from "../config/app";
 
 
 export interface IUsers extends Document {
   email: string;
   password: string;
-  avatar: image;
+  avatar: {data:string, contentType:string};
   status: RoleStatus;
+  courseId: Schema.Types.ObjectId[];
   createAt: Date;
+  updateAt: Date;
   validateUserPassword: (password: string) => Promise<Boolean>;
 }
 
-@Schema()
-export class Users extends Document {
+export const userSchema = new Schema({
+  email:{
+      type: String,
+      required: true,
+      trim: true
+  },
+  password:{
+    type: String,
+    required: true,
+    trim: true
+  },
+  avatar:{
+    type: {data:String, contentType:String},
+    default: {contentType:"NOT IMAGEN"},
+  },
+  status:{
+    type: RoleStatus,
+    default: RoleStatus.STU,
+  },
+  courseId:[{
+      type: Schema.Types.ObjectId,
+      ref: db.collCourse,
+  }],
+  createAt: {
+    type: Date,
+    default: Date.now,
+  },
+  updateAt:{
+    type: Date,
+    default: Date.now,
+  },
+})
 
-  @Prop()
-  email: string;
 
-  @Prop()
-  password: string;
-
-  @Prop({default:RoleStatus.STU})
-  status: RoleStatus;
-
-  @Prop({default:{contentType: "not image"}})
-  avatar: image;
-
-  @Prop({default: Date.now()})
-  createAt: Date;
-
-}
-
-export const UserSchema = SchemaFactory.createForClass(Users);
-
-UserSchema.methods.toJSON = function () {
+userSchema.methods.toJSON = function () {
   const profile = this
   const profileObject = profile.toObject()
   delete profileObject.__v
   return profileObject
 }
 
-UserSchema.pre<IUsers>("save", async function(next) {
+userSchema.pre<IUsers>("save", async function(next) {
   const user = this;
   
   if (!user.isModified("password")) return next();
@@ -56,7 +69,7 @@ UserSchema.pre<IUsers>("save", async function(next) {
   next();
 });
 
-UserSchema.methods.validateUserPassword = async function (password: string): Promise<Boolean>{
+userSchema.methods.validateUserPassword = async function (password: string): Promise<Boolean>{
   //const user = this;
 
   //const hash = await bcrypt.hash(password, this.salt);
@@ -64,3 +77,4 @@ UserSchema.methods.validateUserPassword = async function (password: string): Pro
   return await bcrypt.compare(password, this.password);
 }
 
+export const Course = model<IUsers>(db.collUser, userSchema)

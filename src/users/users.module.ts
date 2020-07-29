@@ -2,29 +2,29 @@ import { Module } from '@nestjs/common';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
 import { MongooseModule } from '@nestjs/mongoose';
-import { UserSchema, IUsers } from './users.schema';
+import { userSchema, IUsers } from './users.schema';
 import { JwtStrategy } from './jwt/auth';
 import * as config from 'config';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { MulterModule } from '@nestjs/platform-express';
 import { imageFilter } from './image/filter';
+import { AwsUpload } from './image/aws';
+import { jwt, db } from "../config/app";
 
-const jwtConfig = config.get('jwt');
-const dbConfig = config.get('db');
 
 @Module({
   imports: [
     //create token
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
-      secret: process.env.JWT_SECRET || jwtConfig.secret,
+      secret: jwt.secret,
       signOptions: {
-        expiresIn: process.env.EXP_JWT || jwtConfig.expiresIn,
+        expiresIn: jwt.expiresIn,
       },
     }),
     //create collection
-    MongooseModule.forFeature([{ name: dbConfig.dbUser, schema: UserSchema }]),
+    MongooseModule.forFeature([{ name: db.collUser, schema: userSchema }]),
     
     MulterModule.registerAsync({
       useFactory:()=>({
@@ -37,6 +37,7 @@ const dbConfig = config.get('db');
   providers: [
     JwtStrategy,//activate Bearer
     UsersService,
+    AwsUpload,
   ],
   exports: [
       JwtStrategy,

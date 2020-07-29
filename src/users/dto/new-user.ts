@@ -6,6 +6,7 @@ export class NewUser {
     @IsEmail()
     email: string;
 
+    /*
     @IsNotEmpty()
     @IsString()
     @MinLength(8)
@@ -15,6 +16,10 @@ export class NewUser {
         { message: 'password too weak' },
     )
     password: string;
+    */
+   @IsNotEmpty()
+   @IsString()
+   password: string;
 
     status: RoleStatus;
 }
