@@ -6,14 +6,17 @@ const awsConfig = config.get('aws');
 
 dotenv.config()
 
-const port = process.env.APP_PORT || 3000
+const port = process.env.APP_PORT || 4000
 const host = process.env.APP_HOST || '0.0.0.0'
 
 const username = process.env.DB_USERNAME || dbConfig.username
 const password = process.env.DB_PASSWORD || dbConfig.password
 const database = process.env.DB_DATABASE || 'mimo'
 const collUser = process.env.DB_COLL_USER || 'Users'
-const collCourse = process.env.DB_COLL_COURSE || 'Mycourses'
+const collCourse = process.env.DB_COLL_COURSE || 'Courses'
+const collChapter = process.env.DB_COLL_COURSE || 'Chapters'
+const collContent = process.env.DB_COLL_COURSE || 'Content'
+const collProgress = process.env.DB_COLL_COURSE || 'Progress'
 
 const secret = process.env.JWT_SECRET || 'topSecret'
 const expiresIn = process.env.JWT_EXP || 3600
@@ -35,6 +38,9 @@ const db = {
 
     collUser,
     collCourse,
+    collChapter,
+    collContent,
+    collProgress,
 }
 
 const jwt = {
@@ -42,9 +48,9 @@ const jwt = {
     expiresIn,
 }
 const aws = {
-  bucket,
-  keyid,
-  secretid,
+    bucket,
+    keyid,
+    secretid,
 }
 
 //console.log(app)

@@ -4,7 +4,6 @@ import { UsersService } from './users.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { userSchema, IUsers } from './users.schema';
 import { JwtStrategy } from './jwt/auth';
-import * as config from 'config';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { MulterModule } from '@nestjs/platform-express';

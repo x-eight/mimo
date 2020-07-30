@@ -9,7 +9,7 @@ export interface ICourse extends Document {
   description: string;
   students: number;
   slug: string;
-  chapter: string[];
+  chapterId: Schema.Types.ObjectId[];
   createAt: Date;
   updateAt: Date;
 }
@@ -25,7 +25,7 @@ export const courseSchema = new Schema({
     required: true,
     trim: true
   },
-  language:{
+  language: {
     type: String,
     required: true,
   },
@@ -41,9 +41,9 @@ export const courseSchema = new Schema({
     type: String,
     default: "",
   },
-  chapter: [{
-    type: String,
-    trim: true
+  chapterId: [{
+    type: Schema.Types.ObjectId,
+    ref: db.collChapter,
   }],
   createAt: {
     type: Date,

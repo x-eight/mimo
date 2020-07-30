@@ -4,7 +4,6 @@ export interface MockCourse {
     tema: string;
     language: string;
     description: string;
-    chapter: string[];
 
     slug: string;
 }

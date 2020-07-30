@@ -17,9 +17,6 @@ export class NewCourse {
     @IsString()
     description: string;
 
-    @IsNotEmpty()
-    chapter: string[];
-
     slug: string;
 
     

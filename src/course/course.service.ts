@@ -59,7 +59,6 @@ export class CourseService {
                 tema : company.companyName(),
                 language : lorem.word(),
                 description : lorem.words(),
-                chapter : [lorem.word(), lorem.word()],
                 slug : ""
             }
             generateData.slug = slugify(generateData.title,{lower:true})
@@ -76,8 +75,9 @@ export class CourseService {
     async totalCourse(
         searchCourse: SearchCourse,
     ): Promise<ICourse[]> {
-        const { search } = searchCourse
-        const course = await this.courseModel.find({$or:[{title: new RegExp(search)},{tema: new RegExp(search)}]})
+        const { search } = searchCourse 
+        const course = await this.courseModel.find({$or:[{title: new RegExp(search)},
+                                                    {tema: new RegExp(search)}]}).populate({ path: 'chapterId', select: 'name',})
 
         if (!course) {
             this.logger.verbose(`course dont exist`);
@@ -92,6 +92,8 @@ export class CourseService {
         slugCourse: string
     ): Promise<ICourse> {
         const course = await this.courseModel.findOne({slug: slugCourse})
+                                        .populate({ path: 'chapterId', select: 'name',
+                                        populate: {path: 'contentId', select: 'name'} })
 
         if (!course) {
             this.logger.verbose(`course dont exist`);
@@ -116,7 +118,6 @@ export class CourseService {
         }
 
         try {
-            //console.log()
             const course = await this.courseModel.findById(id);
             if (!course) {
                 throw new NotImplementedException('dont exist course!')
