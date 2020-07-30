@@ -43,6 +43,9 @@ export class CourseService {
 
         const user = await this.userModel.findById(userId.id)
         user.courseId = user.courseId.concat(id)
+        //
+        const user1 = await this.getCourse("")
+        //
         await user.save()
         await course.save()
         return course
@@ -69,6 +72,15 @@ export class CourseService {
 
         fs.writeFileSync("src/course/dto/data.json", JSON.stringify(users, null, "\t"));
         
+    }
+
+    async getCourse(
+        id: string,
+    ): Promise<ICourse> {
+        const course = await this.courseModel.findById(id)
+                                        .populate({ path: 'chapterId', select: 'name',
+                                        populate: {path: 'contentId', select: 'name'} })
+        return course
     }
 
 
