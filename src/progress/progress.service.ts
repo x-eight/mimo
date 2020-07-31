@@ -11,6 +11,7 @@ import { IContent } from 'src/content/content.schema';
 import { StatusAdavance } from './new.enum/status';
 import { UpdateProgress } from './dto/updateProgress';
 import { strict } from 'assert';
+import { CatchId } from './dto/catchId';
 
 @Injectable()
 export class ProgressService {
@@ -102,6 +103,14 @@ export class ProgressService {
         const updatecourse = await this.progressModel.findOne({ courseId: <any>(ids.CourseId) })
 
         return updatecourse
+    }
+
+    async getProgress(
+        courseId: CatchId,
+    ):Promise<IProgress>{
+        const { id } = courseId
+        const course = await this.progressModel.findOne({ courseId: id })
+        return course
     }
 
 

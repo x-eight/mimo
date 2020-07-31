@@ -1,9 +1,10 @@
-import { Controller, Post, Body, ValidationPipe, Logger, Put } from '@nestjs/common';
+import { Controller, Post, Body, ValidationPipe, Logger, Put, Get, Query } from '@nestjs/common';
 import { NewProgress } from './dto/newProgress';
 import { ProgressService } from './progress.service';
 import { IProgress } from './progress.schema';
 import { StatusAdavance } from './new.enum/status';
 import { UpdateProgress } from './dto/updateProgress';
+import { CatchId } from './dto/catchId';
 
 @Controller('progress')
 export class ProgressController {
@@ -24,6 +25,13 @@ export class ProgressController {
         //@Body('status', RoleValidationPipe) status: StatusAdavance,
     ): Promise<IProgress> {
         return this.progressService.updateProgress(status);
+    }
+
+    @Get()
+    getProgress(
+        @Query() id : CatchId,
+    ): Promise<IProgress> {
+        return this.progressService.getProgress(id);
     }
 
 }
