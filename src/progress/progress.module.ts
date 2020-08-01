@@ -8,6 +8,7 @@ import { userSchema } from 'src/users/users.schema';
 import { courseSchema } from 'src/course/course.schema';
 import { chapterSchema } from 'src/chapter/chapter.schema';
 import { contentSchema } from 'src/content/content.schema';
+import { UsersModule } from 'src/users/users.module';
 
 @Module({
   imports:[
@@ -21,6 +22,8 @@ import { contentSchema } from 'src/content/content.schema';
     MongooseModule.forFeature([{ name: db.collChapter, schema: chapterSchema }]),
     //create collection
     MongooseModule.forFeature([{ name: db.collContent, schema: contentSchema }]),
+
+    UsersModule,
   ],
   controllers: [ProgressController],
   providers: [ProgressService]

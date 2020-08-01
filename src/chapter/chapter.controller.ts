@@ -49,9 +49,9 @@ export class ChapterController {
 
     @Delete()
     deleteChapte(
-        id: string,
-    ){
-        return this.chapterService.deleteChapter(id)
+        @Query() chapterId: CatchId,
+    ):Promise<{ delete: string }>{
+        return this.chapterService.deleteChapter(chapterId)
     }
 
 }

@@ -7,6 +7,7 @@ import { NewCourse } from "./dto/newCourse";
 import { CatchId } from "./dto/catchId";
 import { UploadCourse } from './dto/uploadCourse';
 import { SearchCourse } from './dto/search';
+import { IUsers } from 'src/users/users.schema';
 
 @Controller('course')
 export class CourseController {
@@ -25,7 +26,7 @@ export class CourseController {
     @Post('/add')
     @UseGuards(AuthGuard())
     async addCourseUser(
-        @GetUser() user: User,
+        @GetUser() user: IUsers,
         @Query() id : CatchId,
     ):Promise<ICourse>{
         return this.courseService.addCourseUser(user, id)
@@ -69,7 +70,7 @@ export class CourseController {
     @UseGuards(AuthGuard())
     deleteCourse(
         @Query('id') id : CatchId,
-    ):Promise<ICourse>{
+    ):Promise<{ delete: string }>{
         return this.courseService.deleteCourse(id)
     }
 

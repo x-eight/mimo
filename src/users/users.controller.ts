@@ -9,7 +9,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { GetUser } from './decorator/user';
 import { FileInterceptor } from "@nestjs/platform-express";
 import { CatchId } from './dto/catchId';
-
+import { UpdateUser } from './dto/updateUser';
 
 @Controller('users')
 export class UsersController {
@@ -47,16 +47,17 @@ export class UsersController {
     @Get('/home')
     @UseGuards(AuthGuard())
     homeUser(
-        @GetUser() user: User,
+        @GetUser() user: IUsers,
     ):Promise<IUsers> {
         return this.usersService.homeUser(user);
     }
 
-    @Put('/role')
+    @Put()
     @UseGuards(AuthGuard())
     updateStatus(
-        @Body('status', RoleValidationPipe) status: RoleStatus,
-        @GetUser() user: User,
+        //@Body('status', RoleValidationPipe) status: RoleStatus,
+        @Body(ValidationPipe) status: UpdateUser,
+        @GetUser() user: IUsers,
     ): Promise<IUsers> {
         return this.usersService.updateStatus(user, status);
     }
@@ -65,7 +66,7 @@ export class UsersController {
     @UseGuards(AuthGuard())
     @UseInterceptors(FileInterceptor('file'))
     uploadFile(
-        @GetUser() user: User,
+        @GetUser() user: IUsers,
         @UploadedFile() file
         ): Promise<string> {
         return this.usersService.uploadImg(user,file);
@@ -74,15 +75,15 @@ export class UsersController {
     @Delete()
     @UseGuards(AuthGuard())
     deleteUser(
-        @GetUser() user: User,
-    ):Promise<IUsers>{
+        @GetUser() user: IUsers,
+    ):Promise<{ delete: string }>{
         return this.usersService.deleteUser(user)
     }
 
     @Delete('/mycourse')
     @UseGuards(AuthGuard())
     deleteCourse(
-        @GetUser() user: User,
+        @GetUser() user: IUsers,
         @Query('id') id : CatchId,
     ):Promise<IUsers>{
         return this.usersService.deleteCourse(user, id)

@@ -1,9 +1,10 @@
-import { Controller, Logger, Post, Put, Delete, Body, ValidationPipe, Get, Query } from '@nestjs/common';
+import { Controller, Logger, Post, Put, Delete, Body, ValidationPipe, Get, Query, UseInterceptors, UploadedFile } from '@nestjs/common';
 import { ContentService } from './content.service';
 import { NewContent } from './dto/newContent';
 import { IContent } from './content.schema';
 import { UpdateContent } from './dto/updateContent';
 import { CatchId } from './dto/catchId';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('content')
 export class ContentController {
@@ -39,6 +40,16 @@ export class ContentController {
         return this.contentService.getContent(id)
     }
 
+    @Put('/file')
+    @UseInterceptors(FileInterceptor('file'))
+    uploadFile(
+        @Query('id') id : CatchId,
+        @UploadedFile() file
+        ): Promise<string> {
+        console.log(id)
+        return this.contentService.uploadFile(id,file);
+    }
+
     @Put()
     updateChapter(
         @Query() id : CatchId,
@@ -49,9 +60,9 @@ export class ContentController {
 
     @Delete()
     deleteChapte(
-        id: string,
-    ):Promise<IContent>{
-        return this.contentService.deleteContent(id)
+        @Query() contendId: CatchId,
+    ):Promise<{ delete: string }>{
+        return this.contentService.deleteContent(contendId)
     }
 
 

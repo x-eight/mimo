@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, NotImplementedException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { IProgress } from './progress.schema';
@@ -12,6 +12,7 @@ import { StatusAdavance } from './new.enum/status';
 import { UpdateProgress } from './dto/updateProgress';
 import { strict } from 'assert';
 import { CatchId } from './dto/catchId';
+
 
 @Injectable()
 export class ProgressService {
@@ -34,15 +35,13 @@ export class ProgressService {
     ) { }
 
     async newProgress(
+        userId: IUsers,
         createProgress: NewProgress,
     ): Promise<IProgress> {
-        let test1 = []
-        let test2 = []
-        const user = await this.userModel.findOne({ _id: createProgress.userId })
-        if (!user) {
-            throw new UnauthorizedException('Invalid user');
-        }
-        const course = await this.courseModel.findOne({ _id: createProgress.courseId })
+        createProgress.userId = userId.id
+        let chapter = []
+        let content = []
+        const course = await this.courseModel.findById(createProgress.courseId)
         if (!course) {
             throw new UnauthorizedException('Invalid course');
         }
@@ -52,64 +51,67 @@ export class ProgressService {
 
             for (let index = 0; index < getChapter.contentId.length; index++) {
                 let getContent = await this.contentModel.findById(getChapter.contentId[index])
-                await test2.push({
+                await content.push({
                     id: getContent.id,
                     name: getContent.name,
                     status: "no"
                 })
             }
 
-            await test1.push({
+            await chapter.push({
                 id: getChapter.id,
-                contentId: test2,
+                contentId: content,
                 name: getChapter.name
             })
-            test2 = []
+            content = []
         }
 
-        createProgress.chapter = test1
-
+        createProgress.chapter = chapter
         const test3 = await new this.progressModel(createProgress)
-
         return test3.save()
     }
 
     async updateProgress(
+        userId: IUsers,
         ids: UpdateProgress,
-        //updateAdvance: StatusAdavance,
     ): Promise<IProgress> {
-        const course = await this.progressModel.findOne({ courseId: <any>(ids.CourseId) })
+        const course = await this.progressModel.findOne({ userId: userId.id, courseId: ids.CourseId })
         if (!course) {
             throw new UnauthorizedException('Invalid course');
         }
 
-        const chapterId = course.chapter.findIndex((note, chapterId) => {
-            return note.id === ids.ChapterId
-        })
-
-        const contentId = course.chapter[chapterId].contentId.findIndex((note, contentId) => {
-            return note.id === ids.ContentId
-        })
-        /*
-        course.chapter[chapterId].contentId[contentId].status = "yes"
-        console.log(course)
-        */
-        const update = {
-            $set:{ [`chapter.${chapterId}.contentId.${contentId}.status`] : "yes" }
-        };
-
-        await course.updateOne(update);
-
-        const updatecourse = await this.progressModel.findOne({ courseId: <any>(ids.CourseId) })
-
-        return updatecourse
+        try {
+            const chapterId = course.chapter.findIndex((note, chapterId) => {
+                return note.id === ids.ChapterId
+            })
+    
+            const contentId = course.chapter[chapterId].contentId.findIndex((note, contentId) => {
+                return note.id === ids.ContentId
+            })
+            /*
+            course.chapter[chapterId].contentId[contentId].status = "yes"
+            console.log(course)
+            */
+            const update = {
+                $set:{ [`chapter.${chapterId}.contentId.${contentId}.status`] : ids.advance }
+            };
+    
+            await course.updateOne(update);
+    
+            const updatecourse = await this.progressModel.findOne({ courseId: ids.CourseId })
+    
+            return updatecourse
+        } catch (error) {
+            throw new NotImplementedException(`update failed with error: ${error}`)
+        }
     }
 
     async getProgress(
+        userId: IUsers,
         courseId: CatchId,
     ):Promise<IProgress>{
         const { id } = courseId
-        const course = await this.progressModel.findOne({ courseId: id })
+        const course = await this.progressModel.findOne({ userId: userId.id , courseId: id })
         return course
     }
 

@@ -6,7 +6,7 @@ const awsConfig = config.get('aws');
 
 dotenv.config()
 
-const port = process.env.APP_PORT || 4000
+const port = process.env.APP_PORT || 3000
 const host = process.env.APP_HOST || '0.0.0.0'
 
 const username = process.env.DB_USERNAME || dbConfig.username

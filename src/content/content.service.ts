@@ -1,4 +1,4 @@
-import { Injectable, Logger, NotImplementedException } from '@nestjs/common';
+import { Injectable, Logger, NotImplementedException, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { db } from "../config/app";
 import { Model } from 'mongoose';
@@ -6,8 +6,9 @@ import slugify from 'slugify';
 import { NewContent } from "./dto/newContent";
 import { UpdateContent } from "./dto/updateContent";
 import { IContent } from './content.schema';
-import { IChapter, Chapter } from 'src/chapter/chapter.schema';
+import { IChapter } from 'src/chapter/chapter.schema';
 import { CatchId } from './dto/catchId';
+import { AwsUpload } from './files/aws';
 
 @Injectable()
 export class ContentService {
@@ -18,6 +19,8 @@ export class ContentService {
 
         @InjectModel(db.collChapter)
         private chapterModel: Model<IChapter>,
+
+        private aws: AwsUpload,
     ) { }
 
     async newContent(
@@ -86,34 +89,62 @@ export class ContentService {
         }
     }
 
-    async deleteContent(
-        id: string,
-    ): Promise<IContent> {
-        try {
-            const chapter = await this.contentModel.findById(id)
+    async uploadFile(
+        contentId: CatchId,
+        file,
+    ): Promise<string> {
+        const id  = <any>contentId
+        
+        const content = await this.contentModel.findById(id);
+        console.log(content)
+        //const url = this.aws.fileupload(id, file)
+        const url = await this.aws.fileupload(id, file).then(data => {
+            return data
+        }
+        )
 
-            if (!chapter) {
-                this.logger.verbose(`user with ID "${id}" cant delete`);
-                throw new NotImplementedException(`user with ID "${id}" cant delete`);
+        content.file = url
+        content.updateAt = new Date()
+        await content.save()
+        return url
+
+    }
+
+    async deleteContent(
+        chapterId: CatchId,
+    ): Promise<{ delete: string }> {
+        const { id } = chapterId
+        try {
+            const result = await this.contentModel.deleteOne({ _id: id});
+
+            //--------------------------//
+            const course = await this.chapterModel.findById(id);
+            if (!course) {
+                this.logger.verbose(`dont exist course`);
+                throw new NotImplementedException(`dont exist course`);
             }
-            await this.contentModel.deleteOne({ _id: id });
-            return chapter;
+            course.contentId = course.contentId.filter(element => {
+                return element !== id
+            });
+            await course.save();
+            //--------------------------//
+            return { delete:`Deleted ${result.deletedCount} item.` }
         } catch (error) {
-            this.logger.verbose(`cant delete chapter`);
-            throw new NotImplementedException(error);
+            this.logger.verbose(`Delete failed with error: ${error}`);
+            throw new NotFoundException(`Delete failed with error: ${error}`)
         }
     }
 
     async removeContent(
-        id: string,
-    ): Promise<IContent> {
-        const chapter = await this.contentModel.findById(id)
+        chapterId: CatchId,
+    ): Promise<{ delete: string }> {
+        const { id } = chapterId
         try {
-            await chapter.remove()
-            return chapter
+            const result = await this.chapterModel.deleteOne({ _id: id});
+            return { delete:`Deleted ${result.deletedCount} item.` }
         } catch (error) {
-            this.logger.verbose(`cant delete chapter`);
-            throw new NotImplementedException(error);
+            this.logger.verbose(`Delete failed with error: ${error}`);
+            throw new NotFoundException(`Delete failed with error: ${error}`)
         }
     }
 

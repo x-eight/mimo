@@ -5,6 +5,7 @@ import { db } from "../config/app";
 
 
 export interface IUsers extends Document {
+  _id: Schema.Types.ObjectId;
   email: string;
   password: string;
   avatar: {data:string, contentType:string};
@@ -16,6 +17,7 @@ export interface IUsers extends Document {
 }
 
 export const userSchema = new Schema({
+  _id: { type: Schema.Types.ObjectId, auto: true },
   email:{
       type: String,
       required: true,
@@ -77,4 +79,4 @@ userSchema.methods.validateUserPassword = async function (password: string): Pro
   return await bcrypt.compare(password, this.password);
 }
 
-export const Course = model<IUsers>(db.collUser, userSchema)
+export const User = model<IUsers>(db.collUser, userSchema)

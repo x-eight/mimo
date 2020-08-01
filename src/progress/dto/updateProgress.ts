@@ -1,16 +1,22 @@
-import { IsNotEmpty, IsString } from "class-validator";
+import { IsNotEmpty, IsString, IsOptional, IsIn } from "class-validator";
+import { Schema } from "mongoose";
+import { StatusAdavance } from "../new.enum/status";
 
 export class UpdateProgress {
     @IsNotEmpty()
     @IsString()
-    CourseId: string;
+    CourseId: Schema.Types.ObjectId;
 
     @IsNotEmpty()
     @IsString()
-    ChapterId: string;
+    ChapterId: Schema.Types.ObjectId;
 
     @IsNotEmpty()
     @IsString()
-    ContentId: string;
+    ContentId: Schema.Types.ObjectId;
+
+    @IsOptional()
+    @IsIn([StatusAdavance.YES, StatusAdavance.NO])
+    advance: StatusAdavance ;
 
 }

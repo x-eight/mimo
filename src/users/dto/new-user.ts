@@ -1,5 +1,4 @@
 import { IsNotEmpty, IsEmail, IsString, MinLength, MaxLength, Matches } from "class-validator";
-import { RoleStatus } from "../new.enum/role";
 
 export class NewUser {
     @IsNotEmpty()
@@ -20,6 +19,4 @@ export class NewUser {
    @IsNotEmpty()
    @IsString()
    password: string;
-
-    status: RoleStatus;
 }

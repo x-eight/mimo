@@ -3,10 +3,9 @@ import { Schema } from "mongoose";
 
 export class NewProgress {
     @IsNotEmpty()
-    userId: Schema.Types.ObjectId;
-
-    @IsNotEmpty()
     courseId: Schema.Types.ObjectId;
     
+    userId: Schema.Types.ObjectId;
+
     chapter: any;
 }

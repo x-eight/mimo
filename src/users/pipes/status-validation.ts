@@ -1,6 +1,5 @@
-import { PipeTransform, BadRequestException, Injectable, ArgumentMetadata } from "@nestjs/common";
+import { PipeTransform, BadRequestException } from "@nestjs/common";
 import { RoleStatus } from "../new.enum/role";
-import * as mongose from 'mongoose';
 
 //export class CourseValidationPipe implements PipeTransform {
 export class RoleValidationPipe implements PipeTransform {
@@ -24,13 +23,3 @@ export class RoleValidationPipe implements PipeTransform {
     }
 }
 
-@Injectable()
-export class ValidateObjectId implements PipeTransform<string> {
-  async transform(value: string, metadata: ArgumentMetadata) {
-    const isValid = mongose.Types.ObjectId.isValid(value);
-    if (!isValid) {
-        throw new BadRequestException('Invalid ID!');
-    }
-    return value;
-  }
-}

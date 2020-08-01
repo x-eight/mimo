@@ -1,4 +1,4 @@
-import { Injectable, Logger, NotImplementedException } from '@nestjs/common';
+import { Injectable, Logger, NotImplementedException, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { IChapter } from './chapter.schema';
@@ -8,7 +8,6 @@ import { UpdateChapter } from './dto/updateChapter';
 import { ICourse } from 'src/course/course.schema';
 import slugify from 'slugify';
 import { CatchId } from './dto/catchId';
-import { async } from 'rxjs';
 
 @Injectable()
 export class ChapterService {
@@ -89,33 +88,40 @@ export class ChapterService {
     }
 
     async deleteChapter(
-        id: string,
-    ): Promise<IChapter> {
+        chapterId: CatchId,
+    ): Promise<{ delete: string }> {
+        const { id } = chapterId
         try {
-            const chapter = await this.chapterModel.findById(id)
+            const result = await this.chapterModel.deleteOne({ _id: id});
 
-            if (!chapter) {
-                this.logger.verbose(`user with ID "${id}" cant delete`);
-                throw new NotImplementedException(`user with ID "${id}" cant delete`);
+            //--------------------------//
+            const course = await this.courseModel.findById(id);
+            if (!course) {
+                this.logger.verbose(`dont exist course`);
+                throw new NotImplementedException(`dont exist course`);
             }
-            await this.chapterModel.deleteOne({ _id: id });
-            return chapter;
+            course.chapterId = course.chapterId.filter(element => {
+                return element !== id
+            });
+            await course.save();
+            //--------------------------//
+            return { delete:`Deleted ${result.deletedCount} item.` }
         } catch (error) {
-            this.logger.verbose(`cant delete chapter`);
-            throw new NotImplementedException(error);
+            this.logger.verbose(`Delete failed with error: ${error}`);
+            throw new NotFoundException(`Delete failed with error: ${error}`)
         }
     }
 
     async removeChapter(
-        id: string,
-    ): Promise<IChapter> {
-        const chapter = await this.chapterModel.findById(id)
+        chapterId: CatchId,
+    ): Promise<{ delete: string }> {
+        const { id } = chapterId
         try {
-            await chapter.remove()
-            return chapter
+            const result = await this.chapterModel.deleteOne({ _id: id});
+            return { delete:`Deleted ${result.deletedCount} item.` }
         } catch (error) {
-            this.logger.verbose(`cant delete chapter`);
-            throw new NotImplementedException(error);
+            this.logger.verbose(`Delete failed with error: ${error}`);
+            throw new NotFoundException(`Delete failed with error: ${error}`)
         }
     }
 
