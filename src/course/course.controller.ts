@@ -8,6 +8,8 @@ import { CatchId } from "./dto/catchId";
 import { UploadCourse } from './dto/uploadCourse';
 import { SearchCourse } from './dto/search';
 import { IUsers } from 'src/users/users.schema';
+import { IChapter } from 'src/chapter/chapter.schema';
+import { IContent } from 'src/content/content.schema';
 
 @Controller('course')
 export class CourseController {
@@ -55,6 +57,23 @@ export class CourseController {
         return this.courseService.getCoursoBySlug(slug);
     }
 
+    @Get('/:slug0/:slug1')
+    getChapterBySlug(
+        @Param('slug0') slug0: string,
+        @Param('slug1') slug1: string,
+    ):Promise<IChapter> {
+        return this.courseService.getChapterBySlug(slug0,slug1);
+    }
+
+    @Get('/:slug0/:slug1/:slug2')
+    getContentBySlug(
+        @Param('slug0') slug0: string,
+        @Param('slug1') slug1: string,
+        @Param('slug2') slug2: string,
+    ):Promise<IContent> {
+        return this.courseService.getContentBySlug(slug0,slug1,slug2);
+    }
+
     ///////////7--------------------------------////////
     @Put()
     uploadCourse(
@@ -67,9 +86,8 @@ export class CourseController {
     ///////////7--------------------------------////////
 
     @Delete()
-    @UseGuards(AuthGuard())
     deleteCourse(
-        @Query('id') id : CatchId,
+        @Query() id : CatchId,
     ):Promise<{ delete: string }>{
         return this.courseService.deleteCourse(id)
     }

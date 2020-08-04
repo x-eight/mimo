@@ -10,6 +10,7 @@ import { GetUser } from './decorator/user';
 import { FileInterceptor } from "@nestjs/platform-express";
 import { CatchId } from './dto/catchId';
 import { UpdateUser } from './dto/updateUser';
+import { LoginNumber, VerifyNumber } from './dto/verify';
 
 @Controller('users')
 export class UsersController {
@@ -22,6 +23,20 @@ export class UsersController {
         @Body(ValidationPipe) addUserDto: NewUser,
     ):Promise<IUsers>{
         return this.usersService.newUser(addUserDto)
+    }
+
+    @Post('/loginNumber')
+    async newNumber(
+        @Body(ValidationPipe) num: LoginNumber,
+    ): Promise<{action: any}>{
+        return this.usersService.newNumber(num)
+    }
+
+    @Post('/verify')
+    async validateNumber(
+        @Body(ValidationPipe) verifyNumber: VerifyNumber,
+    ): Promise<{action: any}>{
+        return this.usersService.validateNumber(verifyNumber)
     }
 
     @Post('/login')

@@ -3,6 +3,7 @@ import * as config from 'config';
 
 const dbConfig = config.get('db');
 const awsConfig = config.get('aws');
+//const twiConfig = config.get('twilio');
 
 dotenv.config()
 
@@ -24,6 +25,11 @@ const expiresIn = process.env.JWT_EXP || 3600
 const bucket = process.env.AWS_S3_BUCKET_NAME || awsConfig.bucket_name
 const keyid = process.env.ACCESS_KEY_ID || awsConfig.key_id
 const secretid = process.env.SECRET_ACCES_KEY || awsConfig.secret_id
+
+const twilioNumber = process.env.TWI_NUMBER || "*"//twiConfig.twilioNumber
+const accountSid = process.env.TWI_ACCOUNT || "*"//twiConfig.accountSid
+const authToken = process.env.TWI_AUTH || "*"//twiConfig.authToken
+const serviceId = process.env.TWI_SERVICE || "*"//twiConfig.serviceId
 
 
 const server = {
@@ -47,11 +53,19 @@ const jwt = {
     secret,
     expiresIn,
 }
+
 const aws = {
     bucket,
     keyid,
     secretid,
 }
 
+const twi = {
+    twilioNumber,
+    accountSid,
+    authToken,
+    serviceId,
+}
+
 //console.log(app)
-export { server, jwt, db, aws }
+export { server, jwt, db, aws, twi }

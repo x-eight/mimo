@@ -8,6 +8,7 @@ import { UpdateChapter } from './dto/updateChapter';
 import { ICourse } from 'src/course/course.schema';
 import slugify from 'slugify';
 import { CatchId } from './dto/catchId';
+import { IContent } from 'src/content/content.schema';
 
 @Injectable()
 export class ChapterService {
@@ -18,6 +19,9 @@ export class ChapterService {
 
         @InjectModel(db.collCourse)
         private courseModel: Model<ICourse>,
+
+        @InjectModel(db.collContent)
+        private contentModel: Model<IContent>,
     ) { }
 
     async newChapter(
@@ -43,22 +47,32 @@ export class ChapterService {
 
     async getTotalChapter(
     ): Promise<IChapter[]> {
-        return this.chapterModel.find().populate('contentId', 'name')
+        try {
+            return this.chapterModel.find().populate('contentId', 'name')
+        } catch (error) {
+            this.logger.verbose(`get failed with error: ${error}`);
+            throw new NotFoundException(`get failed with error: ${error}`)
+        }
     }
 
     async getChapterOfCourse(
         courseId: CatchId,
     ): Promise<IChapter[]> {
         const { id } = courseId
-        //let iChapter: IChapter[]
         let iChapter = [];
-        const course = await this.courseModel.findById(id)
+        try {
+            const course = await this.courseModel.findById(id)
 
-        for (let index = 0; index < course.chapterId.length; index++) {
-            let getCourse = await this.chapterModel.findById(course.chapterId[index]).populate('contentId', 'name video file')
-            await iChapter.push(getCourse)
+            for (let index = 0; index < course.chapterId.length; index++) {
+                let getCourse = await this.chapterModel.findById(course.chapterId[index]).populate('contentId', 'name video file')
+                await iChapter.push(getCourse)
+            }
+            return iChapter
+        } catch (error) {
+            this.logger.verbose(`get failed with error: ${error}`);
+            throw new NotFoundException(`get failed with error: ${error}`)
         }
-        return iChapter
+        
     }
 
     async getChapter(
@@ -66,6 +80,10 @@ export class ChapterService {
     ): Promise<IChapter> {
         const { id } = chapterId
         const chapter = await this.chapterModel.findById(id).populate('contentId', 'name video file')
+        if (!chapter) {
+            this.logger.verbose(`chapter dont exist`);
+            throw new NotImplementedException(`chapter dont exist`);
+        }
         return chapter
     }
 
@@ -90,35 +108,24 @@ export class ChapterService {
     async deleteChapter(
         chapterId: CatchId,
     ): Promise<{ delete: string }> {
+        let sumContent: number = 0
         const { id } = chapterId
         try {
-            const result = await this.chapterModel.deleteOne({ _id: id});
+            const chapter = await this.chapterModel.findById(id);
+            const course = await this.courseModel.findById(chapter.courseId);
 
-            //--------------------------//
-            const course = await this.courseModel.findById(id);
-            if (!course) {
-                this.logger.verbose(`dont exist course`);
-                throw new NotImplementedException(`dont exist course`);
-            }
             course.chapterId = course.chapterId.filter(element => {
-                return element !== id
+                return element != id
             });
-            await course.save();
-            //--------------------------//
-            return { delete:`Deleted ${result.deletedCount} item.` }
-        } catch (error) {
-            this.logger.verbose(`Delete failed with error: ${error}`);
-            throw new NotFoundException(`Delete failed with error: ${error}`)
-        }
-    }
 
-    async removeChapter(
-        chapterId: CatchId,
-    ): Promise<{ delete: string }> {
-        const { id } = chapterId
-        try {
-            const result = await this.chapterModel.deleteOne({ _id: id});
-            return { delete:`Deleted ${result.deletedCount} item.` }
+            for (let index = 0; index < chapter.contentId.length; index++) {
+                let content = await this.contentModel.deleteOne({ _id: chapter.contentId[index] });
+                sumContent = sumContent + content.deletedCount
+            }
+
+            let result = await this.chapterModel.deleteOne({ _id: id });
+            await course.save();
+            return { delete: `Deleted ${result.deletedCount} chapter and ${sumContent} content` }
         } catch (error) {
             this.logger.verbose(`Delete failed with error: ${error}`);
             throw new NotFoundException(`Delete failed with error: ${error}`)

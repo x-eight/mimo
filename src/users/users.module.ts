@@ -10,6 +10,7 @@ import { MulterModule } from '@nestjs/platform-express';
 import { imageFilter } from './image/filter';
 import { AwsUpload } from './image/aws';
 import { jwt, db } from "../config/app";
+import { progressSchema } from 'src/progress/progress.schema';
 
 
 @Module({
@@ -24,6 +25,8 @@ import { jwt, db } from "../config/app";
     }),
     //create collection
     MongooseModule.forFeature([{ name: db.collUser, schema: userSchema }]),
+    //create collection
+    MongooseModule.forFeature([{ name: db.collProgress, schema: progressSchema }]),
     
     MulterModule.registerAsync({
       useFactory:()=>({

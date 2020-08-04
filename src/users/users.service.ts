@@ -1,7 +1,6 @@
 import { Injectable, NotFoundException, Logger, NotImplementedException, UnauthorizedException } from '@nestjs/common';
 import { NewUser } from './dto/new-user';
 import { IUsers } from './users.schema';
-import { RoleStatus } from './new.enum/role';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { loginUser } from './dto/login';
@@ -9,12 +8,14 @@ import { JwtService } from '@nestjs/jwt';
 import { JwtPayload } from './jwt/payload';
 import * as fs from "fs";
 import { internet } from "faker";
-import { db } from "../config/app";
+import { db, twi } from "../config/app";
 import { MockUser } from 'mockData/user';
 import { AwsUpload } from './image/aws';
 import { CatchId } from './dto/catchId';
-import slugify from 'slugify';
 import { UpdateUser } from './dto/updateUser';
+import { IProgress } from 'src/progress/progress.schema';
+import * as Twilio from 'twilio';
+import { LoginNumber, VerifyNumber } from './dto/verify';
 
 
 @Injectable()
@@ -24,10 +25,70 @@ export class UsersService {
         @InjectModel(db.collUser)
         private userModel: Model<IUsers>,
 
+        @InjectModel(db.collProgress)
+        private progressModel: Model<IProgress>,
+
         private jwtService: JwtService,
 
         private aws: AwsUpload,
     ) { }
+
+    async newNumber(
+        phoneNumber: LoginNumber,
+    ): Promise<{action: any}> {
+        const { phone } = phoneNumber
+        const client = Twilio(twi.accountSid, twi.authToken);
+        try {
+            // Validate E164 format
+            if (!(/^\+?[1-9]\d{1,14}$/.test(phone))) {
+                throw new NotFoundException('number must be E164 format!')
+            }
+
+            const test = client.verify.services(twi.serviceId).verifications
+                .create({
+                    to: phone,
+                    channel: 'sms'
+                }).then((message) => {
+                    console.log("Verification is sent!!", message.status)
+                    return message.status
+                })
+                .catch((error) => console.log("Verification dont sent!!", error))
+            return {action: test}
+        } catch (error) {
+            this.logger.verbose(`validate failed with error: ${error}`);
+            throw new NotFoundException(`validate failed with error: ${error}`)
+        }
+
+    }
+
+    async validateNumber(
+        verifyNumber: VerifyNumber,
+    ): Promise<{action: any}> {
+        const { phone, code } = verifyNumber
+        const client = Twilio(twi.accountSid, twi.authToken);
+        try {
+            // Validate E164 format
+            if (!(/^\+?[1-9]\d{1,14}$/.test(phone))) {
+                throw new NotFoundException('number must be E164 format!')
+            }
+            const test = client.verify.services(twi.serviceId).verificationChecks
+                .create({
+                    to: phone,
+                    code: code
+                })
+                .then(data => {
+                    if (data.status === "approved") {
+                        console.log("User is Verified!!", data.status)
+                        return data.status
+                    }
+                })
+                .catch((error) => console.log("Verification dont sent!!", error))
+                return {action: test}
+        } catch (error) {
+            this.logger.verbose(`validate failed with error: ${error}`);
+            throw new NotFoundException(`validate failed with error: ${error}`)
+        }
+    }
 
     async newUser(
         createUserDto: NewUser,
@@ -126,7 +187,7 @@ export class UsersService {
         } catch (error) {
             throw new NotImplementedException(`update failed with error: ${error}`)
         }
-        
+
     }
 
     //---------------Image---------------//
@@ -148,7 +209,7 @@ export class UsersService {
             };
             user.updateAt = new Date()
             await user.updateOne(update);
-    
+
             /////await this.userModel.findOne({ _id: userToken.id });
             return url
         } catch (error) {
@@ -161,14 +222,20 @@ export class UsersService {
     async deleteUser(
         userToken: IUsers,
     ): Promise<{ delete: string }> {
+        let sumProgress: number = 0
         try {
+            const user = await this.userModel.findById(userToken.id)
+            for (let index = 0; index < user.courseId.length; index++) {
+                let Nprogress = await this.progressModel.deleteOne({ userId: userToken.id, courseId: user.courseId[index] })
+                sumProgress = sumProgress + Nprogress.deletedCount
+            }
             const result = await this.userModel.deleteOne({ _id: userToken.id });
-            return { delete:`Deleted ${result.deletedCount} item.` }
+            return { delete: `Deleted ${result.deletedCount} user and ${sumProgress} progress` }
         } catch (error) {
             this.logger.verbose(`Delete failed with error: ${error}`);
             throw new NotFoundException(`Delete failed with error: ${error}`)
         }
-    
+
     }
 
     async deleteCourse(
@@ -178,17 +245,15 @@ export class UsersService {
         const { id } = courseId
         try {
             const user = await this.userModel.findById(userToken.id);
-            if (!user) {
-                this.logger.verbose(`dont exist course`);
-                throw new NotImplementedException(`dont exist course`);
-            }
+
             user.courseId = user.courseId.filter(element => {
-                return element !== id
+                return element != id
             });
             await user.save();
             return user
         } catch (error) {
-            throw new NotImplementedException(error);
+            this.logger.verbose(`Delete failed with error: ${error}`);
+            throw new NotFoundException(`Delete failed with error: ${error}`)
         }
     }
 

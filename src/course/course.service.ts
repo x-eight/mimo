@@ -13,6 +13,8 @@ import * as fs from "fs";
 import slugify from "slugify";
 import { IUsers } from 'src/users/users.schema';
 import { IProgress } from 'src/progress/progress.schema';
+import { IChapter } from 'src/chapter/chapter.schema';
+import { IContent } from 'src/content/content.schema';
 
 @Injectable()
 export class CourseService {
@@ -23,6 +25,12 @@ export class CourseService {
 
         @InjectModel(db.collUser)
         private userModel: Model<IUsers>,
+
+        @InjectModel(db.collChapter)
+        private chapterModel: Model<IChapter>,
+
+        @InjectModel(db.collContent)
+        private contentModel: Model<IContent>,
 
         @InjectModel(db.collProgress)
         private progressModel: Model<IProgress>,
@@ -122,6 +130,35 @@ export class CourseService {
         return course;
     }
 
+    async getChapterBySlug(
+        slug0: string,
+        slug1: string,
+    ): Promise<IChapter> {
+        const slug = slug0 + "/" + slug1
+        const chapter = await this.chapterModel.findOne({ slug: slug })
+            .populate({path: 'contentId', select: 'name'})
+            
+        if (!chapter) {
+            this.logger.verbose(`chapter dont exist`);
+            throw new NotImplementedException(`chapter dont exist`);
+        }
+        return chapter;
+    }
+
+    async getContentBySlug(
+        slug0: string,
+        slug1: string,
+        slug2: string,
+    ): Promise<IContent> {
+        const slug = slug0 + "/" + slug1 + "/" + slug2
+        const content = await this.contentModel.findOne({ slug: slug })
+            
+        if (!content) {
+            this.logger.verbose(`content dont exist`);
+            throw new NotImplementedException(`content dont exist`);
+        }
+        return content;
+    }
 
     //--------------Course--------------//
     async uploadCourse(
@@ -148,7 +185,7 @@ export class CourseService {
             await course.save()
             return course
         } catch (error) {
-            throw new NotImplementedException(error)
+            throw new NotImplementedException(`Update failed with error: ${error}`)
         }
 
     }
@@ -156,10 +193,25 @@ export class CourseService {
     async deleteCourse(
         courseId: CatchId,
     ): Promise<{ delete: string }> {
+        let sumContent: number = 0
+        let sumChapter: number = 0
         const { id } = courseId
         try {
-            const result = await this.courseModel.deleteOne({ _id: id});
-            return { delete:`Deleted ${result.deletedCount} item.` }
+            const course = await this.courseModel.findById(id);
+
+            for (let index = 0; index < course.chapterId.length; index++) {
+                let chapter = await this.chapterModel.findById(course.chapterId[index])
+    
+                for (let index2 = 0; index2 < chapter.contentId.length; index2++) {
+                    let Ncontent = await this.contentModel.deleteOne({ _id: chapter.contentId[index2] });
+                    sumContent = sumContent + Ncontent.deletedCount
+                }
+                let Nchapter = await this.chapterModel.deleteOne({ _id: course.chapterId[index] });
+                sumChapter = sumChapter + Nchapter.deletedCount
+            }
+
+            let result = await this.courseModel.deleteOne({ _id: id });
+            return { delete: `Deleted ${result.deletedCount} course and ${sumChapter} chapter and ${sumContent} content` }
         } catch (error) {
             this.logger.verbose(`Delete failed with error: ${error}`);
             throw new NotFoundException(`Delete failed with error: ${error}`)

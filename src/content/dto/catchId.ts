@@ -1,7 +1,9 @@
 import { IsEmail, IsNotEmpty } from 'class-validator';
+import { Schema } from 'mongoose';
 
 export class CatchId {
-    id: any;
+    id: Schema.Types.ObjectId;
 }
+
 
     

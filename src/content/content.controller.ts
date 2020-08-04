@@ -5,6 +5,7 @@ import { IContent } from './content.schema';
 import { UpdateContent } from './dto/updateContent';
 import { CatchId } from './dto/catchId';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { Schema } from 'mongoose';
 
 @Controller('content')
 export class ContentController {
@@ -43,7 +44,7 @@ export class ContentController {
     @Put('/file')
     @UseInterceptors(FileInterceptor('file'))
     uploadFile(
-        @Query('id') id : CatchId,
+        @Query() id : CatchId,
         @UploadedFile() file
         ): Promise<string> {
         console.log(id)

@@ -1,5 +1,6 @@
 import { Document, Schema, model } from 'mongoose';
 import { db } from "../config/app";
+import { Chapter } from 'src/chapter/chapter.schema';
 //import { Chapter } from 'src/chapter/chapter.schema';
 
 
@@ -54,6 +55,12 @@ contentSchema.methods.toJSON = function () {
 
 contentSchema.pre('remove', async function (next) {
     const profile = this
+    //console.log(profile._id)
+    //const test = await Chapter.deleteMany({ _id: profile.chapterId })
+    //const test = await Chapter.findById("5f25bf0d0ca19a20238726fe")
+    //console.log(test)
+    //await Public.deleteMany({ userId: profile.chapterId })
+    //await Friend.deleteMany({ userId: profile._id })
     
     next()
 })

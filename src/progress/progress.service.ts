@@ -54,7 +54,7 @@ export class ProgressService {
                 await content.push({
                     id: getContent.id,
                     name: getContent.name,
-                    status: "no"
+                    status: StatusAdavance.NO
                 })
             }
 
@@ -88,10 +88,6 @@ export class ProgressService {
             const contentId = course.chapter[chapterId].contentId.findIndex((note, contentId) => {
                 return note.id === ids.ContentId
             })
-            /*
-            course.chapter[chapterId].contentId[contentId].status = "yes"
-            console.log(course)
-            */
             const update = {
                 $set:{ [`chapter.${chapterId}.contentId.${contentId}.status`] : ids.advance }
             };

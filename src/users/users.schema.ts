@@ -15,6 +15,7 @@ export interface IUsers extends Document {
   updateAt: Date;
   validateUserPassword: (password: string) => Promise<Boolean>;
 }
+//number
 
 export const userSchema = new Schema({
   _id: { type: Schema.Types.ObjectId, auto: true },

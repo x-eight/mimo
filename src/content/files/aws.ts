@@ -13,7 +13,7 @@ export class AwsUpload {
     constructor() { }
 
 //        const fileType = (file.mimetype).split('/');
-    async fileupload(id: string ,file: any): Promise<string> {
+    async fileupload(id:any ,file: any): Promise<string> {
         const fileType = (file.mimetype).split('/');
         const urlkey = `${id}.${fileType[1]}`
         const params = {

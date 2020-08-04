@@ -93,11 +93,9 @@ export class ContentService {
         contentId: CatchId,
         file,
     ): Promise<string> {
-        const id  = <any>contentId
-        
+        const { id } = contentId
+
         const content = await this.contentModel.findById(id);
-        console.log(content)
-        //const url = this.aws.fileupload(id, file)
         const url = await this.aws.fileupload(id, file).then(data => {
             return data
         }
@@ -115,33 +113,15 @@ export class ContentService {
     ): Promise<{ delete: string }> {
         const { id } = chapterId
         try {
-            const result = await this.contentModel.deleteOne({ _id: id});
-
-            //--------------------------//
-            const course = await this.chapterModel.findById(id);
-            if (!course) {
-                this.logger.verbose(`dont exist course`);
-                throw new NotImplementedException(`dont exist course`);
-            }
-            course.contentId = course.contentId.filter(element => {
-                return element !== id
+            const content = await this.contentModel.findById(id)
+            const chapter = await this.chapterModel.findById(content.chapterId);
+            
+            chapter.contentId = chapter.contentId.filter(element => {
+                return element != id
             });
-            await course.save();
-            //--------------------------//
-            return { delete:`Deleted ${result.deletedCount} item.` }
-        } catch (error) {
-            this.logger.verbose(`Delete failed with error: ${error}`);
-            throw new NotFoundException(`Delete failed with error: ${error}`)
-        }
-    }
-
-    async removeContent(
-        chapterId: CatchId,
-    ): Promise<{ delete: string }> {
-        const { id } = chapterId
-        try {
-            const result = await this.chapterModel.deleteOne({ _id: id});
-            return { delete:`Deleted ${result.deletedCount} item.` }
+            await content.remove()
+            await chapter.save();
+            return { delete:`Deleted content` }
         } catch (error) {
             this.logger.verbose(`Delete failed with error: ${error}`);
             throw new NotFoundException(`Delete failed with error: ${error}`)
